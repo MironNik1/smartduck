@@ -47,6 +47,12 @@ async def solve_photo(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Task.photo)
 
 @router.message(F.photo, Task.photo)
+async def save_photo(message: Message):
+    file_id = message.photo[-1].file_id
+    file = await bot.get_file(file_id)
+    file_path = os.path.join('photos', file.file_path)
+    await message.bot.download_file(file.file_path, file_path)
+    await message.reply(f'Фото сохранено! {file_path}')
 async def get_photo(message: Message, state: FSMContext, bot: Bot):
     try:
         file = message.photo
