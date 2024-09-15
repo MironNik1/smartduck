@@ -4,7 +4,9 @@ from markups.usr import *
 from ai import AIGenerate, AIVision
 from aiogram.fsm.context import FSMContext
 from data.user import UserX
-from routers.States.usr.State import Task, BuyPRO
+from routers.States.usr.State import Text, Photo, BuyPRO
+from PIL import Image
+from configs.botcfg import TOKEN as API_TOKEN
 
 import os
 
@@ -29,20 +31,41 @@ async def get_answer(message: Message, state: FSMContext):
 @router.callback_query(F.data == 'text')
 async def text_format(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Введите условие задачи:', reply_markup=otmena_kb())
-    await state.set_state(Task.text)
+    await state.set_state(Text.get)
 
-@router.message(Task.text)
+@router.message(Text.get)
 async def generate_answer(message: Message, state: FSMContext):
     task = message.text
     try:
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
         await state.clear()
-    except Exception as e:
+    except Exception:
         await state.clear()
         await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
-@router.callback_query(F.data == 'dislike' or F.data == 'like')
+@router.callback_query(F.data == 'photo')
+async def get_photo(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('Отправьте изображение вашей задачи:', reply_markup=otmena_kb())
+    await state.set_state(Photo.get)
+
+@router.message(Photo.get)
+async def handle_photo(message: Message, bot: Bot, state: FSMContext):
+    photo = message.photo[-1]
+    file_info = await bot.get_file(photo.file_id)
+    await bot.download(file=file_info, destination='photo.jpg')
+
+    answer = AIVision(file='photo.jpg')
+    await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
+        
+    os.remove('photo.jpg')
+
+
+@router.callback_query(F.data == 'dislike')
+async def like_dislike(callback: CallbackQuery):
+    await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
+    
+@router.callback_query(F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
 
@@ -50,6 +73,10 @@ async def like_dislike(callback: CallbackQuery):
 async def buy_pro(message: Message):
     await message.answer('🌟 Купить PRO', reply_markup=get_back_kb())
     await message.answer('Для чего нужна PRO подписка?\n-Безлимитный доступ к боту, участие в различных конкурсах, доступ в закрытый чат, а также вы можете принять участие в бета-тестировании нашей нейросети WorxAI на 100%(Генерация текста и кода, Помощь с повседневными делами, Генерация красивых изображений, Ответ в текстовом формате, в аудио, а также в формате изображения)\n(Действует скидка 15% на PRO)', reply_markup=payment_kb())
+
+@router.message(F.text == '🤖 Тест WorxAI')
+async def testworxai(message: Message):
+    await message.answer('Для полного тестирования нужна подписка PRO!', reply_markup=get_back_kb())
 
 @router.callback_query(F.data == 'cancel')
 async def cancel_solve(callback: CallbackQuery, state: FSMContext):

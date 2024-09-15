@@ -7,7 +7,8 @@ def AIGenerate(prompt):
     response = model.generate_content(prompt)
     return response.text
 
-def AIVision(file, prompt='Реши задачку или пример на фото'):
+def AIVision(file, prompt='Реши задачку или пример или ответь на вопросы на фото с подробным объяснением'):
+    genai.configure(api_key=KEY)
     file_photo = genai.upload_file(file)
     model = genai.GenerativeModel(MODEL)
     result = model.generate_content(
