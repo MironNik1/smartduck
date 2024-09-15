@@ -1,5 +1,4 @@
 import google.generativeai as genai
-import PIL.Image
 from configs.aicfg import *
 
 def AIGenerate(prompt):
