@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from data.user import UserX
 from routers.States.usr.State import Task, BuyPRO
 
+import os
 
 router = Router()
 
