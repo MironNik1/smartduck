@@ -41,6 +41,15 @@ async def generate_answer(message: Message, state: FSMContext):
         await state.clear()
         await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
+@router.callback_query(F.data == 'photo')
+async def solve_photo(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('📸 Отправьте фото:')
+    await state.set_state(Task.photo)
+
+@router.message(F.photo, Task.photo)
+async def get_photo(message: Message, state: FSMContext):
+    pass
+
 @router.callback_query(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
