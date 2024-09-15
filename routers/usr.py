@@ -52,7 +52,7 @@ async def get_photo(message: Message, state: FSMContext, bot: Bot):
         file = message.photo
         answer = AIVision()
         await message.answer(answer)
-    except: await message.answer('Не могу ответить')
+    except Exception as e: await message.answer(f'Не могу ответить {e}')
 
 @router.callback_query(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
