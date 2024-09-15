@@ -40,5 +40,6 @@ def action_solve():
     return kb.as_markup()
 
 def otmena_kb():
-    kb = InlineKeyboardBuilder().add(InlineKeyboardButton(text='🚫 Отменить', callback_data='cancel'))
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='🚫 Отменить', callback_data='cancel'))
     return kb.as_markup()

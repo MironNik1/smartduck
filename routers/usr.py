@@ -41,7 +41,7 @@ async def generate_answer(message: Message, state: FSMContext):
         await state.clear()
         await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
-@router.message(F.data == 'dislike' or F.data == 'like')
+@router.callback_query(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
 
@@ -50,7 +50,7 @@ async def buy_pro(message: Message):
     await message.answer('🌟 Купить PRO', reply_markup=get_back_kb())
     await message.answer('Для чего нужна PRO подписка?\n-Безлимитный доступ к боту, участие в различных конкурсах, доступ в закрытый чат, а также вы можете принять участие в бета-тестировании нашей нейросети WorxAI на 100%(Генерация текста и кода, Помощь с повседневными делами, Генерация красивых изображений, Ответ в текстовом формате, в аудио, а также в формате изображения)\n(Действует скидка 15% на PRO)', reply_markup=payment_kb())
 
-@router.message(F.data == 'cancel')
+@router.callback_query(F.data == 'cancel')
 async def cancel_solve(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.clear()
