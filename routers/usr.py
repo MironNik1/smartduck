@@ -37,8 +37,7 @@ async def generate_answer(message: Message, state: FSMContext):
         await state.clear()
         await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
-@router.message(F.data == 'like')
-@router.message(F.data == 'dislike')
+@router.message(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer('Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️')
 
