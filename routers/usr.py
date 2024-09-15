@@ -38,10 +38,10 @@ async def generate_answer(message: Message, state: FSMContext):
     await message.reply('👨🏻‍🏫 Генерирую ответ...')
     task = message.text
     try:
-        await message.delete()
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         await state.clear()
+        await message.delete()
     except Exception:
         await state.clear()
         await message.delete()
