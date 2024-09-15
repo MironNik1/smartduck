@@ -1,7 +1,7 @@
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from markups.usr import *
-from ai import AIGenerate
+from ai import AIGenerate, AIVision
 from aiogram.fsm.context import FSMContext
 from data.user import UserX
 from routers.States.usr.State import Task, BuyPRO
@@ -48,8 +48,11 @@ async def solve_photo(callback: CallbackQuery, state: FSMContext):
 
 @router.message(F.photo, Task.photo)
 async def get_photo(message: Message, state: FSMContext, bot: Bot):
-    await message.bot.download(file=message.photo[-1].file_id)
-    await message.answer('Скачал')
+    try:
+        file = message.photo
+        answer = AIVision()
+        await message.answer(answer)
+    except: await message.answer('Не могу ответить')
 
 @router.callback_query(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
