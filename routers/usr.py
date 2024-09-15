@@ -30,11 +30,12 @@ async def get_answer(message: Message, state: FSMContext):
 async def generate_answer(message: Message, state: FSMContext):
     task = message.text
     try:
-        answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением, без Markdown.')
-        await message.answer(f'Ваш ответ: \n\n\n{answer}')
+        answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
+        await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
         await state.clear()
     except Exception as e:
-        print(e, answer)
+        await state.clear()
+        await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
 @router.message(F.text == '🌟 Купить PRO')
 async def buy_pro(message: Message):
