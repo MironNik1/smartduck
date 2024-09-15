@@ -41,4 +41,4 @@ def action_solve():
 
 def otmena_kb():
     kb = InlineKeyboardBuilder().add(InlineKeyboardButton(text='🚫 Отменить', callback_data='cancel'))
-    return otmena_kb.as_markup()
+    return kb.as_markup()
