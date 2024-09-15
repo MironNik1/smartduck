@@ -38,7 +38,7 @@ async def generate_answer(message: Message, state: FSMContext):
     task = message.text
     try:
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
-        await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
+        await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         await state.clear()
     except Exception:
         await state.clear()
@@ -56,7 +56,7 @@ async def handle_photo(message: Message, bot: Bot, state: FSMContext):
     await bot.download(file=file_info, destination='photo.jpg')
 
     answer = AIVision(file='photo.jpg')
-    await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
+    await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         
     os.remove('photo.jpg')
 
