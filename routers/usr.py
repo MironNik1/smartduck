@@ -46,19 +46,13 @@ async def solve_photo(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('📸 Отправьте фото:')
     await state.set_state(Task.photo)
 
-@router.message(F.photo, Task.photo)
+@router.message(Task.photo)
 async def save_photo(message: Message):
     file_id = message.photo[-1].file_id
-    file = await bot.get_file(file_id)
+    file = await message.bot.get_file(file_id)
     file_path = os.path.join('photos', file.file_path)
     await message.bot.download_file(file.file_path, file_path)
     await message.reply(f'Фото сохранено! {file_path}')
-async def get_photo(message: Message, state: FSMContext, bot: Bot):
-    try:
-        file = message.photo
-        answer = AIVision()
-        await message.answer(answer)
-    except Exception as e: await message.answer(f'Не могу ответить {e}')
 
 @router.callback_query(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
