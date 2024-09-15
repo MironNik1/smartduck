@@ -18,6 +18,12 @@ def get_buy_pro_kb():
     kb.add(InlineKeyboardButton(text='Купить PRO (навсегда = 10$)', callback_data='buy_subscrition'))
     return kb.as_markup()
 
+def like_kb():
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='👍🏻', callback_data='like'))
+    kb.add(InlineKeyboardButton(text='👎🏻', callback_data='dislike'))
+    return kb.as_markup(max_width=1)
+
 def payment_kb():
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text='Оплатить с баланса', callback_data='pay_from_balance'))
