@@ -61,9 +61,9 @@ async def handle_photo(message: Message, bot: Bot, state: FSMContext):
         await bot.download(file=file_info, destination='photo.jpg')
 
         answer = AIVision(file='photo.jpg')
-        await message.delete()
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         await state.clear()
+        await message.delete()
         
         os.remove('photo.jpg')
     except:
