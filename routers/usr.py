@@ -35,13 +35,16 @@ async def text_format(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Text.get)
 async def generate_answer(message: Message, state: FSMContext):
+    await message.reply('👨🏻‍🏫 Генерирую ответ...')
     task = message.text
     try:
+        await message.delete()
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         await state.clear()
     except Exception:
         await state.clear()
+        await message.delete()
         await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
 
 @router.callback_query(F.data == 'photo')
@@ -51,14 +54,21 @@ async def get_photo(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Photo.get)
 async def handle_photo(message: Message, bot: Bot, state: FSMContext):
-    photo = message.photo[-1]
-    file_info = await bot.get_file(photo.file_id)
-    await bot.download(file=file_info, destination='photo.jpg')
+    await message.reply('👨🏻‍🏫 Генерирую ответ...')
+    try:
+        photo = message.photo[-1]
+        file_info = await bot.get_file(photo.file_id)
+        await bot.download(file=file_info, destination='photo.jpg')
 
-    answer = AIVision(file='photo.jpg')
-    await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
+        answer = AIVision(file='photo.jpg')
+        await message.delete()
+        await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         
-    os.remove('photo.jpg')
+        os.remove('photo.jpg')
+    except:
+        await state.clear()
+        await message.delete()
+        await message.answer('Ошибка при взятии фото, попробуйте еще раз!')
 
 
 @router.callback_query(F.data == 'dislike')
