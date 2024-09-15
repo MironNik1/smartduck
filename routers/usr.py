@@ -39,7 +39,7 @@ async def generate_answer(message: Message, state: FSMContext):
 
 @router.message(F.data == 'dislike' or F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
-    await callback.answer('Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️')
+    await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
 
 @router.message(F.text == '🌟 Купить PRO')
 async def buy_pro(message: Message):
