@@ -48,8 +48,7 @@ async def solve_photo(callback: CallbackQuery, state: FSMContext):
 
 @router.message(F.photo, Task.photo)
 async def get_photo(message: Message, state: FSMContext, bot: Bot):
-    file = message.photo
-    await bot.download(file)
+    await message.bot.download(file=message.photo[-1].file_id)
     await message.answer('Скачал')
 
 @router.callback_query(F.data == 'dislike' or F.data == 'like')
