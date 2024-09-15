@@ -3,7 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 class Task(StatesGroup):
-    task = State()
+    photo = State()
+    text = State()
 
 class BuyPRO(StatesGroup):
     buy = State()

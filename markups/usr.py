@@ -30,5 +30,15 @@ def payment_kb():
     kb.row(InlineKeyboardButton(text='Оплатить через AAIO(СПб, карта, и тд)', callback_data='pay_by_RUcard'))
     kb.row(InlineKeyboardButton(text='Оплатить с CryptoBot', callback_data='pay_by_send'))
     kb.row(InlineKeyboardButton(text='Оплатить с ClickUZ', callback_data='pay_by_click'))
-    kb.row(InlineKeyboardButton(text='Назад', callback_data='back'))
     return kb.as_markup(max_width=1)
+
+def action_solve():
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='Отправить текст', callback_data='text'))
+    kb.add(InlineKeyboardButton(text='Отправить фото', callback_data='photo'))
+
+    return kb.as_markup()
+
+def otmena_kb():
+    kb = InlineKeyboardBuilder().add(InlineKeyboardButton(text='🚫 Отменить', callback_data='cancel'))
+    return otmena_kb.as_markup()

@@ -23,10 +23,14 @@ async def back(message: Message):
 
 @router.message(F.text == '✨ Получить ответ')
 async def get_answer(message: Message, state: FSMContext):
-    await message.answer('Введите условие вашей задачи:')
-    await state.set_state(Task.task)
+    await message.answer('Выберите способ отправки задания:', reply_markup=action_solve())
 
-@router.message(Task.task)
+@router.callback_query(F.data == 'text')
+async def text_format(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('Введите условие задачи:', reply_markup=otmena_kb())
+    await state.set_state(Task.text)
+
+@router.message(Task.text)
 async def generate_answer(message: Message, state: FSMContext):
     task = message.text
     try:
@@ -45,3 +49,9 @@ async def like_dislike(callback: CallbackQuery):
 async def buy_pro(message: Message):
     await message.answer('🌟 Купить PRO', reply_markup=get_back_kb())
     await message.answer('Для чего нужна PRO подписка?\n-Безлимитный доступ к боту, участие в различных конкурсах, доступ в закрытый чат, а также вы можете принять участие в бета-тестировании нашей нейросети WorxAI на 100%(Генерация текста и кода, Помощь с повседневными делами, Генерация красивых изображений, Ответ в текстовом формате, в аудио, а также в формате изображения)\n(Действует скидка 15% на PRO)', reply_markup=payment_kb())
+
+@router.message(F.data == 'cancel')
+async def cancel_solve(callback: CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    await state.clear()
+    await callback.message.answer('Действие отменено')
