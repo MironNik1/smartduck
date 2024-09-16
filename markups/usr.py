@@ -43,3 +43,18 @@ def otmena_kb():
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text='🚫 Отменить', callback_data='cancel'))
     return kb.as_markup()
+
+def action_with_ai():
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='Общение', callback_data='get_dialogue'))
+    kb.add(InlineKeyboardButton(text='Генерация текста', callback_data='get_help'))
+    kb.row(InlineKeyboardButton(text='Генерация кода', callback_data='get_code'))
+    kb.row(InlineKeyboardButton(text='Генерация изображения', callback_data='get_image'))
+    return kb.as_markup()
+
+def profile_kb():
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='Пополнить баланс', callback_data='top_up'))
+    kb.add(InlineKeyboardButton(text='Настройки', callback_data='settings'))
+    kb.add(InlineKeyboardButton(text='Связь с тех. поддержкой', callback_data='help_me'))
+    return kb.as_markup()

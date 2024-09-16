@@ -15,10 +15,15 @@ router = Router()
 @router.message(F.text == '🌎 Профиль')
 async def profile(message: Message):
     user = UserX().get_user(message.from_user.id)
+    is_premium = user[2]
+    if is_premium == True:
+        is_premium = 'Активна'
+    else: is_premium = 'Не активна'
+    
     id_user = user[0]
     balance = user[4]
     date = user[1]
-    await message.answer(f'🙋‍♂️ Ваш профиль:\n🆔 ID: {id_user}\n💵 Баланс: {balance}$\n📅 Дата регистрации: {date}')
+    await message.answer(f'🙋‍♂️ Ваш профиль:\n🆔 ID: {id_user}\n💵 Баланс: {balance}$\n✨ PRO подписка: {is_premium} \n📅 Дата регистрации: {date}', reply_markup=profile_kb())
 
 @router.message(F.text == '⬅️ Назад')
 async def back(message: Message):
@@ -31,6 +36,7 @@ async def get_answer(message: Message, state: FSMContext):
 @router.callback_query(F.data == 'text')
 async def text_format(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Введите условие задачи:', reply_markup=otmena_kb())
+    await callback.answer()
     await state.set_state(Text.get)
 
 @router.message(Text.get)
@@ -40,13 +46,14 @@ async def generate_answer(message: Message, state: FSMContext):
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
         await state.clear()
-    except Exception:
+    except Exception as e:
         await state.clear()
-        await message.answer('Не могу ответить на ваш вопрос :(', reply_markup=like_kb())
+        await message.answer(f'Не могу ответить на ваш вопрос :(\n\n{{e}}', reply_markup=like_kb())
 
 @router.callback_query(F.data == 'photo')
 async def get_photo(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Отправьте изображение вашей задачи:', reply_markup=otmena_kb())
+    await callback.answer()
     await state.set_state(Photo.get)
 
 @router.message(Photo.get)
@@ -57,6 +64,7 @@ async def handle_photo(message: Message, bot: Bot, state: FSMContext):
 
     answer = AIVision(file='photo.jpg')
     await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
+    await state.clear()
         
     os.remove('photo.jpg')
 
@@ -76,10 +84,20 @@ async def buy_pro(message: Message):
 
 @router.message(F.text == '🤖 Тест WorxAI')
 async def testworxai(message: Message):
-    await message.answer('Для полного тестирования нужна подписка PRO!', reply_markup=get_back_kb())
+    is_premium = UserX.get_user(message.from_user.id)[2]
+    if is_premium == True:
+        await message.answer('Выберите действие с нейросетью:', reply_markup=action_with_ai())
+    else: await message.answer('У вас нет PRO подписки', reply_markup=get_back_kb())
 
 @router.callback_query(F.data == 'cancel')
 async def cancel_solve(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.clear()
     await callback.message.answer('Действие отменено')
+    await callback.answer()
+    
+@router.callback_query(F.data == 'get_dialogue')
+async def get_dialogue(callback: CallbackQuery):
+    await callback.message.answer('Введите ваш вопрос:', reply_markup=otmena_kb())
+    await callback.answer()
+    
