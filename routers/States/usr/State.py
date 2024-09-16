@@ -15,3 +15,6 @@ class Photo(StatesGroup):
 
 class BuyPRO(StatesGroup):
     buy = State()
+
+class Top_Up(StatesGroup):
+    amount = State()

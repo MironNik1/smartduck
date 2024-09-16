@@ -3,16 +3,14 @@ from aiogram.types import Message, CallbackQuery
 from markups.usr import *
 from ai import AIGenerate, AIVision
 from aiogram.fsm.context import FSMContext
-from data.user import UserX
-from routers.States.usr.State import Text, Photo, BuyPRO, User
-from PIL import Image
-from configs.botcfg import TOKEN as API_TOKEN
-
+from data.user import UserX 
+from routers.States.usr.State import Text, Photo, BuyPRO, User, Top_Up
 import os
+import asyncio
 
 router = Router()
 
-@router.message(F.data == 'registration')
+@router.callback_query(F.data == 'registration')
 async def registration(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer('Хорошо, теперь введи свой возраст:')
     await state.set_state(User.age)
@@ -21,7 +19,8 @@ async def registration(callback: CallbackQuery, state: FSMContext):
 async def get_age(message: Message, state: FSMContext):
     age = message.text
     await state.update_data(age=age)
-    UserX().edit_user(tg_id=message.from_user.id, age=int(age))
+    async with UserX() as db:
+        await db.edit_user(tg_id=message.from_user.id, age=int(age))
     await message.answer('Отлично, теперь введи свой гендер:')
     await state.set_state(User.gender)
 
@@ -29,26 +28,27 @@ async def get_age(message: Message, state: FSMContext):
 async def get_male(message: Message, state: FSMContext):
     male = message.text
     await state.update_data(gender=male)
-    UserX().edit_user(tg_id=message.from_user.id, gender=male)
+    async with UserX() as db:
+        await db.edit_user(tg_id=message.from_user.id, gender=male)
     await message.answer('Хорошо, теперь введи своё имя:')
     await state.set_state(User.name)
-    
+
 @router.message(User.name)
 async def get_name(message: Message, state: FSMContext):
     name = message.text
     await state.update_data(name=name)
-    UserX().edit_user(tg_id=message.from_user.id, name=name, isRegistered = True)
+    async with UserX() as db:
+        await db.edit_user(tg_id=message.from_user.id, name=name, isRegistered=True)
     await message.answer_sticker('CAACAgIAAxkBAAEM0QZm6AJoFCsK7GNTzj54X98X7zqDvQACSgIAAladvQrJasZoYBh68DYE')
     await message.answer('Отлично, ты успешно зарегистрировался! Теперь у тебя есть доступ к боту!\n(Напиши команду /start для работы с ботом!)')
+    await message.bot.send_message(6910460878, f'Новый пользователь: {message.from_user.username}')
     await state.clear()
 
 @router.message(F.text == '🌎 Профиль')
 async def profile(message: Message):
-    user = UserX().get_user(message.from_user.id)
-    is_premium = user[2]
-    if is_premium == True:
-        is_premium = 'Активна'
-    else: is_premium = 'Не активна'
+    async with UserX() as db:
+        user = await db.get_user(message.from_user.id)
+    is_premium = 'Активна' if user[2] else 'Не активна'
     
     id_user = user[0]
     balance = user[4]
@@ -80,7 +80,6 @@ async def generate_answer(message: Message, state: FSMContext):
         answer = AIGenerate(f'Помоги с решением данной задачи по школе:\n{task}.  С полным хорошим и понятным обьяснением')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb(), parse_mode='Markdown')
         await state.clear()
-
     except Exception as e:
         await state.clear()
         await message.answer(f'Не могу ответить на ваш вопрос :(\n\n({e})', reply_markup=like_kb())
@@ -100,23 +99,20 @@ async def handle_photo(message: Message, bot: Bot, state: FSMContext):
         file_info = await bot.get_file(photo.file_id)
         await bot.download(file=file_info, destination='photo.jpg')
 
-
         answer = AIVision(file='photo.jpg')
         await message.answer(f'Ваш ответ: \n\n\n{answer}', reply_markup=like_kb())
         await state.clear()
 
-        
         os.remove('photo.jpg')
-    except:
+    except Exception as e:
         await state.clear()
         await message.delete()
         await message.answer('Ошибка при взятии фото, попробуйте еще раз!')
 
-
 @router.callback_query(F.data == 'dislike')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
-    
+
 @router.callback_query(F.data == 'like')
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
@@ -128,10 +124,50 @@ async def buy_pro(message: Message):
 
 @router.message(F.text == '🤖 Тест WorxAI')
 async def testworxai(message: Message):
-    is_premium = UserX.get_user(message.from_user.id)[2]
-    if is_premium == True:
+    async with UserX() as db:
+        user = await db.get_user(message.from_user.id)
+    is_premium = user[2]
+    if is_premium:
         await message.answer('Выберите действие с нейросетью:', reply_markup=action_with_ai())
-    else: await message.answer('У вас нет PRO подписки', reply_markup=get_back_kb())
+    else:
+        await message.answer('У вас нет PRO подписки', reply_markup=get_back_kb())
+
+@router.message(F.text == '👨🏼‍🏫 Помощь')
+async def help(message: Message):
+    await message.answer('''
+**Добро пожаловать в SmartDuck!**
+
+Ваш бот имеет несколько ключевых функций, которые помогут вам в работе. Вот краткое руководство по тому, как пользоваться ботом:
+
+Основные команды и функции:
+Регистрация:
+
+Нажмите на кнопку **"Регистрация"**, чтобы начать процесс регистрации. Вам будет предложено ввести ваш возраст, гендер и имя.
+Профиль:
+
+Нажмите на кнопку **"🌎 Профиль"**, чтобы просмотреть свою информацию. Вы увидите ваше имя, возраст, гендер, баланс, статус подписки PRO и дату регистрации.
+Получить ответ:
+
+Нажмите на кнопку **"✨ Получить ответ"**, чтобы выбрать способ отправки задания. Вы можете выбрать текстовый формат или отправить изображение с задачей.
+Купить PRO:
+
+Нажмите на кнопку **"🌟 Купить PRO"**, чтобы узнать больше о подписке PRO и её преимуществах. Здесь вы можете также сделать покупку и получить доступ к дополнительным функциям.
+Тест WorxAI:
+
+Нажмите на кнопку **"🤖 Тест WorxAI"**, чтобы проверить возможности нашей нейросети. Если у вас есть подписка PRO, вы сможете выбрать действие с нейросетью.
+Обратная связь:
+
+Нажмите на кнопку **"👍 Нравится"** или **"👎 Не нравится"**, чтобы оставить отзыв и помочь нам улучшить бот.
+Отмена действий:
+
+Нажмите на кнопку **"❌ Отмена"**, если хотите отменить текущее действие или задачу.
+Примечания:
+Поддержка PRO: **Подписка PRO** предоставляет доступ к дополнительным функциям, таким как безлимитный доступ, участие в конкурсах и доступ к закрытому чату. Узнайте больше о подписке на кнопке "🌟 Купить PRO".
+
+Помощь с задачами: Вы можете получить помощь с текстовыми задачами или задачами, связанными с изображениями. Просто выберите соответствующий формат на кнопке "✨ Получить ответ".
+
+Если у вас возникли вопросы или проблемы, не стесняйтесь написать нам. Мы всегда рады помочь!
+                         ''', parse_mode='Markdown', reply_markup=get_back_kb())
 
 @router.callback_query(F.data == 'cancel')
 async def cancel_solve(callback: CallbackQuery, state: FSMContext):
@@ -139,9 +175,20 @@ async def cancel_solve(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.answer('Действие отменено')
     await callback.answer()
-    
+
 @router.callback_query(F.data == 'get_dialogue')
 async def get_dialogue(callback: CallbackQuery):
     await callback.message.answer('Введите ваш вопрос:', reply_markup=otmena_kb())
     await callback.answer()
 
+@router.callback_query(F.data == 'top_up')
+async def top_up(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('Введите сумму для пополнения баланса (Мин. сумма для пополнения: 1$):', reply_markup=otmena_kb())
+    await callback.answer()
+    await state.set_state(Top_Up.amount)
+    
+@router.message(Top_Up.amount)
+async def top_up_amount(message: Message, state: FSMContext):
+    amount = message.text
+    if amount.isdigit() and int(amount) >= 1:
+        await message.answer(text='Выберите удобную платежную систему: ')

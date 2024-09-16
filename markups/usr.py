@@ -26,10 +26,10 @@ def like_kb():
 
 def payment_kb():
     kb = InlineKeyboardBuilder()
-    kb.row(InlineKeyboardButton(text='Оплатить с баланса', callback_data='pay_from_balance'))
-    kb.row(InlineKeyboardButton(text='Оплатить через AAIO(СПб, карта, и тд)', callback_data='pay_by_RUcard'))
-    kb.row(InlineKeyboardButton(text='Оплатить с CryptoBot', callback_data='pay_by_send'))
-    kb.row(InlineKeyboardButton(text='Оплатить с ClickUZ', callback_data='pay_by_click'))
+    kb.row(InlineKeyboardButton(text='Купить на 1 день', callback_data='1day'))
+    kb.row(InlineKeyboardButton(text='Купить на 7 дней', callback_data='7day'))
+    kb.row(InlineKeyboardButton(text='Купить на 30 дней', callback_data='30day'))
+    kb.row(InlineKeyboardButton(text='Купить навсгда', callback_data='permanent'))
     return kb.as_markup(max_width=1)
 
 def action_solve():
@@ -56,10 +56,18 @@ def profile_kb():
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text='Пополнить баланс', callback_data='top_up'))
     kb.add(InlineKeyboardButton(text='Настройки', callback_data='settings'))
-    kb.add(InlineKeyboardButton(text='Связь с тех. поддержкой', callback_data='help_me'))
+    kb.row(InlineKeyboardButton(text='Связь с тех. поддержкой', callback_data='help_me'))
     return kb.as_markup()
 
 def registration_kb():
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text='Зарегистрироваться', callback_data='registration'))
     return kb.as_markup()
+
+def payments_kb():
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text='CryptoBot', callback_data='cryptobot'))
+    kb.row(InlineKeyboardButton(text='AAiO', callback_data='aaio'))
+    kb.row(InlineKeyboardButton(text='Click Uzbekistan', callback_data='click'))
+    kb.row(InlineKeyboardButton(text='YooMoney', callback_data='yoomoney'))
+    return kb.as_markup
