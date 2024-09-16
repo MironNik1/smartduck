@@ -14,7 +14,11 @@ class UserX:
                                 registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                 premium BOOLEAN DEFAULT FALSE,
                                 requests_count INT DEFAULT 0,
-                                balance INT DEFAULT 0
+                                balance INT DEFAULT 0,
+                                age INT DEFAULT 0,
+                                gender TEXT DEFAULT None,
+                                name TEXT DEFAULT None,
+                                isRegistered BOOLEAN DEFAULT FALSE
                             )''')
         self.conn.commit()
 
@@ -32,7 +36,7 @@ class UserX:
 
     def edit_user(self, tg_id, **kwargs):
         for key, value in kwargs.items():
-            if key in ['premium', 'balance', 'requests_count']:
+            if key in ['premium', 'balance', 'requests_count', 'age', 'gender', 'name', 'isRegistered']:
                 self.cursor.execute(f"UPDATE telegram_bot_users SET {key} = ? WHERE tg_id = ?", (value, tg_id))
                 self.conn.commit()
 

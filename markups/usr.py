@@ -58,3 +58,8 @@ def profile_kb():
     kb.add(InlineKeyboardButton(text='Настройки', callback_data='settings'))
     kb.add(InlineKeyboardButton(text='Связь с тех. поддержкой', callback_data='help_me'))
     return kb.as_markup()
+
+def registration_kb():
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='Зарегистрироваться', callback_data='registration'))
+    return kb.as_markup()

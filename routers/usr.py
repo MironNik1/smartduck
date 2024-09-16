@@ -4,13 +4,43 @@ from markups.usr import *
 from ai import AIGenerate, AIVision
 from aiogram.fsm.context import FSMContext
 from data.user import UserX
-from routers.States.usr.State import Text, Photo, BuyPRO
+from routers.States.usr.State import Text, Photo, BuyPRO, User
 from PIL import Image
 from configs.botcfg import TOKEN as API_TOKEN
 
 import os
 
 router = Router()
+
+@router.message(F.data == 'registration')
+async def registration(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('Хорошо, теперь введи свой возраст:')
+    await state.set_state(User.age)
+
+@router.message(User.age)
+async def get_age(message: Message, state: FSMContext):
+    age = message.text
+    await state.update_data(age=age)
+    UserX().edit_user(tg_id=message.from_user.id, age=int(age))
+    await message.answer('Отлично, теперь введи свой гендер:')
+    await state.set_state(User.gender)
+
+@router.message(User.gender)
+async def get_male(message: Message, state: FSMContext):
+    male = message.text
+    await state.update_data(gender=male)
+    UserX().edit_user(tg_id=message.from_user.id, gender=male)
+    await message.answer('Хорошо, теперь введи своё имя:')
+    await state.set_state(User.name)
+    
+@router.message(User.name)
+async def get_name(message: Message, state: FSMContext):
+    name = message.text
+    await state.update_data(name=name)
+    UserX().edit_user(tg_id=message.from_user.id, name=name, isRegistered = True)
+    await message.answer_sticker('CAACAgIAAxkBAAEM0QZm6AJoFCsK7GNTzj54X98X7zqDvQACSgIAAladvQrJasZoYBh68DYE')
+    await message.answer('Отлично, ты успешно зарегистрировался! Теперь у тебя есть доступ к боту!\n(Напиши команду /start для работы с ботом!)')
+    await state.clear()
 
 @router.message(F.text == '🌎 Профиль')
 async def profile(message: Message):
@@ -23,7 +53,10 @@ async def profile(message: Message):
     id_user = user[0]
     balance = user[4]
     date = user[1]
-    await message.answer(f'🙋‍♂️ Ваш профиль:\n🆔 ID: {id_user}\n💵 Баланс: {balance}$\n✨ PRO подписка: {is_premium} \n📅 Дата регистрации: {date}', reply_markup=profile_kb())
+    name = user[7]
+    age = user[5]
+    gender = user[6]
+    await message.answer(f'🙋‍♂️ Ваш профиль:\n🆔 ID: {id_user},\n🙋‍♂️ Имя: {name}\n☘️ Возраст: {age}\n👫 Гендер:{gender}\n💵 Баланс: {balance}$\n✨ PRO подписка: {is_premium} \n📅 Дата регистрации: {date}', reply_markup=profile_kb())
 
 @router.message(F.text == '⬅️ Назад')
 async def back(message: Message):
