@@ -20,5 +20,5 @@ def AIConversation(prompt):
     genai.configure(api_key=KEY)
     model = genai.GenerativeModel(MODEL)
     conversation = model.start_chat()
-    conversation.send_message(f'{prompt},( на вопрос кто ты и подобные отвечай что ты Worx AI)', stream=True)
-    return conversation.last_message()
+    response = conversation.send_message(f'{prompt},( на вопрос кто ты и подобные отвечай что ты Worx AI)', stream=True)
+    return response.text
