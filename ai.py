@@ -1,6 +1,9 @@
 import google.generativeai as genai
 from configs.aicfg import *
 
+import time
+
+
 def AIGenerate(prompt):
     genai.configure(api_key=KEY)
     model = genai.GenerativeModel(MODEL)
@@ -22,5 +25,9 @@ def AIConversation(prompt):
     conversation = model.start_chat()
     response = conversation.send_message(f'{prompt},( на вопрос кто ты и подобные отвечай что ты Worx AI)', stream=True)
     try:
+        time.sleep(3)
         return response.text
-    except: return response.resolve()
+    except:
+        response.resolve()
+        time.sleep(3)
+        return response.text
