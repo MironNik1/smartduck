@@ -18,3 +18,6 @@ class BuyPRO(StatesGroup):
 
 class Top_Up(StatesGroup):
     amount = State()
+    
+class Dialogue(StatesGroup):
+    get = State()

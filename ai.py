@@ -15,3 +15,10 @@ def AIVision(file, prompt='Реши задачку или пример или о
         [file_photo, '\n\n', prompt]
     )
     return result.text
+
+def AIConversation(prompt):
+    genai.configure(api_key=KEY)
+    model = genai.GenerativeModel(MODEL)
+    conversation = model.start_chat()
+    conversation.send_message(f'{prompt},( на вопрос кто ты и подобные отвечай что ты Worx AI)', stream=True)
+    return conversation.last_message()

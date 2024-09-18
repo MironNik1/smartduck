@@ -1,10 +1,10 @@
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from markups.usr import *
-from ai import AIGenerate, AIVision
+from ai import AIGenerate, AIVision, AIConversation
 from aiogram.fsm.context import FSMContext
 from data.user import UserX 
-from routers.States.usr.State import Text, Photo, BuyPRO, User, Top_Up
+from routers.States.usr.State import *
 import os
 import asyncio
 
@@ -21,16 +21,21 @@ async def get_age(message: Message, state: FSMContext):
     await state.update_data(age=age)
     async with UserX() as db:
         await db.edit_user(tg_id=message.from_user.id, age=int(age))
-    await message.answer('Отлично, теперь введи свой гендер:')
+    await message.delete()
+    await message.answer('Отлично, теперь введи свой гендер:', reply_markup=gender_kb())
     await state.set_state(User.gender)
 
-@router.message(User.gender)
-async def get_male(message: Message, state: FSMContext):
-    male = message.text
+@router.callback_query(User.gender)
+async def get_male(callback: CallbackQuery, state: FSMContext):
+    if callback.data == 'male': male = 'Мужской'
+    else: male = 'Женский'
+    await callback.message.delete()
     await state.update_data(gender=male)
     async with UserX() as db:
-        await db.edit_user(tg_id=message.from_user.id, gender=male)
-    await message.answer('Хорошо, теперь введи своё имя:')
+        await db.edit_user(tg_id=callback.message.from_user.id, gender=male)
+    await callback.message.delete()
+    await callback.message.answer('Хорошо, теперь введи своё имя:')
+    await callback.answer()
     await state.set_state(User.name)
 
 @router.message(User.name)
@@ -40,7 +45,8 @@ async def get_name(message: Message, state: FSMContext):
     async with UserX() as db:
         await db.edit_user(tg_id=message.from_user.id, name=name, isRegistered=True)
     await message.answer_sticker('CAACAgIAAxkBAAEM0QZm6AJoFCsK7GNTzj54X98X7zqDvQACSgIAAladvQrJasZoYBh68DYE')
-    await message.answer('Отлично, ты успешно зарегистрировался! Теперь у тебя есть доступ к боту!\n(Напиши команду /start для работы с ботом!)')
+    await message.delete()
+    await message.answer('Отлично, ты успешно зарегистрировался! Теперь у тебя есть доступ к боту!\n(Напиши команду /start для работы с ботом!)', reply_markup=get_start_kb())
     await message.bot.send_message(6910460878, f'Новый пользователь: {message.from_user.username}')
     await state.clear()
 
@@ -117,6 +123,10 @@ async def like_dislike(callback: CallbackQuery):
 async def like_dislike(callback: CallbackQuery):
     await callback.answer(text='Спасибо за обратную связь. Вы помогли настроить ИИ! ❤️', show_alert=True)
 
+@router.callback_query(F.data == 'another_one')
+async def another_one(callback: CallbackQuery, state: FSMContext):
+    await text_format(callback=callback, state=state)
+
 @router.message(F.text == '🌟 Купить PRO')
 async def buy_pro(message: Message):
     await message.answer('🌟 Купить PRO', reply_markup=get_back_kb())
@@ -130,7 +140,7 @@ async def testworxai(message: Message):
     if is_premium:
         await message.answer('Выберите действие с нейросетью:', reply_markup=action_with_ai())
     else:
-        await message.answer('У вас нет PRO подписки', reply_markup=get_back_kb())
+        await message.answer('Выберите действие с нейросетью:', reply_markup=action_with_ai())
 
 @router.message(F.text == '👨🏼‍🏫 Помощь')
 async def help(message: Message):
@@ -177,9 +187,21 @@ async def cancel_solve(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 @router.callback_query(F.data == 'get_dialogue')
-async def get_dialogue(callback: CallbackQuery):
-    await callback.message.answer('Введите ваш вопрос:', reply_markup=otmena_kb())
+async def get_dialogue(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer('Диалог со мной начался, вы можете закончить в любой момент, нажав на кнопку "Отмена"', reply_markup=otmena_kb())
+    await state.set_state(Dialogue.get)
     await callback.answer()
+
+@router.message(F.text == '🛑 Остановить')
+async def stop_dialogue(message: Message, state: FSMContext):
+    await message.answer('Диалог остановлен')
+    await message.delete()
+    await state.clear()
+    
+@router.message(Dialogue.get)
+async def dialogue(message: Message, state: FSMContext):
+    prompt = message.text
+    await message.reply(AIConversation(prompt))
 
 @router.callback_query(F.data == 'top_up')
 async def top_up(callback: CallbackQuery, state: FSMContext):
@@ -191,4 +213,6 @@ async def top_up(callback: CallbackQuery, state: FSMContext):
 async def top_up_amount(message: Message, state: FSMContext):
     amount = message.text
     if amount.isdigit() and int(amount) >= 1:
-        await message.answer(text='Выберите удобную платежную систему: ')
+        await message.answer(text='Выберите удобную платежную систему: ', reply_markup=payments_kb())
+    else:
+        await message.answer('Введите корректную сумму')

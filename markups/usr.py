@@ -22,6 +22,7 @@ def like_kb():
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text='👍🏻', callback_data='like'))
     kb.add(InlineKeyboardButton(text='👎🏻', callback_data='dislike'))
+    kb.row(InlineKeyboardButton(text='Решить ещё раз', callback_data='another_one'))
     return kb.as_markup(max_width=1)
 
 def payment_kb():
@@ -47,9 +48,9 @@ def otmena_kb():
 def action_with_ai():
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text='Общение', callback_data='get_dialogue'))
-    kb.add(InlineKeyboardButton(text='Генерация текста', callback_data='get_help'))
-    kb.row(InlineKeyboardButton(text='Генерация кода', callback_data='get_code'))
-    kb.row(InlineKeyboardButton(text='Генерация изображения', callback_data='get_image'))
+    # kb.add(InlineKeyboardButton(text='Генерация текста', callback_data='get_help'))
+    # kb.row(InlineKeyboardButton(text='Генерация кода', callback_data='get_code'))
+    # kb.row(InlineKeyboardButton(text='Генерация изображения', callback_data='get_image'))
     return kb.as_markup()
 
 def profile_kb():
@@ -57,6 +58,7 @@ def profile_kb():
     kb.add(InlineKeyboardButton(text='Пополнить баланс', callback_data='top_up'))
     kb.add(InlineKeyboardButton(text='Настройки', callback_data='settings'))
     kb.row(InlineKeyboardButton(text='Связь с тех. поддержкой', callback_data='help_me'))
+    kb.row(InlineKeyboardButton(text='Промокод', callback_data='promocode'))
     return kb.as_markup()
 
 def registration_kb():
@@ -71,3 +73,14 @@ def payments_kb():
     kb.row(InlineKeyboardButton(text='Click Uzbekistan', callback_data='click'))
     kb.row(InlineKeyboardButton(text='YooMoney', callback_data='yoomoney'))
     return kb.as_markup
+
+def gender_kb():
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text='Мужской', callback_data='male'))
+    kb.row(InlineKeyboardButton(text='Женский', callback_data='female'))
+    return kb.as_markup()
+
+def stop_kb():
+    kb = ReplyKeyboardBuilder()
+    kb.add(KeyboardButton(text='🛑 Остановить', callback_data='stop'))
+    return kb.as_markup()
