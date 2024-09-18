@@ -21,4 +21,6 @@ def AIConversation(prompt):
     model = genai.GenerativeModel(MODEL)
     conversation = model.start_chat()
     response = conversation.send_message(f'{prompt},( на вопрос кто ты и подобные отвечай что ты Worx AI)', stream=True)
-    return response.text
+    try:
+        return response.text
+    except: return response.resolve()
