@@ -23,7 +23,7 @@ def AIConversation(prompt):
     genai.configure(api_key=KEY)
     model = genai.GenerativeModel(MODEL)
     conversation = model.start_chat()
-    response = conversation.send_message(f'{prompt},( на вопрос кто ты отвечай что ты Worx AI)', stream=True)
+    response = conversation.send_message(f'{prompt},( на вопрос кто ты отвечай что ты Worx AI, без упоминаний Google)', stream=True)
     try:
         time.sleep(3)
         return response.text
